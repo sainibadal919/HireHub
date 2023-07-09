@@ -2,54 +2,21 @@ const express=require('express');
 const router=express.Router();
 const User=require('../models/user');
 const passport=require('passport');
-
+const authController=require('../controllers/auth');
 
 // APIs
 
-router.get('/login',(req,res)=>{
-    res.render('users/login');
-})
+router.get('/login',authController.loginForm)
 
 router.post('/login',
 passport.authenticate('local',{
     failureRedirect:'/login'
-}),(req,res)=>{
-     res.redirect('/jobs');
-})
+}),authController.loginLogic)
 
-router.get('/signup', (req,res)=>{
-   res.render('users/signup');
-})
+router.get('/signup',authController.registerForm)
 
-router.post('/signup', async (req,res)=>{
-   
-    try {
-        const newUser=new User({
-            username:req.body.username,
-            cgpa: req.body.cgpa,
-			gender: req.body.gender,
-			phone: req.body.phone,
-			dob: req.body.dob
-        })
-        let registerUser= await User.register(newUser,req.body.password);
-        req.login(registerUser,(error)=>{
-            if(error)res.send(error);
-            res.redirect('/jobs');
-        })
+router.post('/signup', authController.registerLogic)
 
-    } catch (error) {
-        if(error){
-            res.send(error);
-        }
-    }
-
-})
-
-router.get('/logout',(req,res)=>{
-    req.logout((error)=>{
-        if(error)res.send(error);
-        res.redirect('/jobs')
-    })
-})
+router.get('/logout',authController.logoutUser)
 
 module.exports=router;
